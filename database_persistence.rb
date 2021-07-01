@@ -67,7 +67,6 @@ class DatabasePersistence
   end
 
   def disconnect
-    # @db.exec("DEALLOCATE query")
     @db.close
   end
 
@@ -75,8 +74,6 @@ class DatabasePersistence
 
   def query(statement, *params)
     @logger.info("#{statement}: #{params}")
-
-    @db.prepare('query', statement)
-    @db.exec_prepared('query', params)
+    @db.exec_params(statement, params)
   end
 end

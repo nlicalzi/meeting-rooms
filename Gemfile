@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 
-source "https://rubygems.org"
+source 'https://rubygems.org'
 
-ruby "2.6.6"
+ruby '2.6.3'
 
-gem "sinatra"
-gem "sinatra-contrib"
-gem "pg"
+gem 'pg'
+gem 'rubocop', require: false
+gem 'sinatra'
+gem 'sinatra-contrib'
 
 group :production do
-  gem "puma"
+  gem 'puma'
 end

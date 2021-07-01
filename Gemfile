@@ -2,7 +2,7 @@
 
 source 'https://rubygems.org'
 
-ruby '2.6.3'
+ruby '2.6.6'
 
 gem 'pg'
 gem 'rubocop', require: false

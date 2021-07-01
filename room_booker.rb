@@ -18,30 +18,31 @@ after do
 end
 
 helpers do
+  # Ensure that there is no other meeting with an overlapping time range for the given room payload
   def room_available?(payload)
-    # ensure that there is no other meeting in room_id with an overlapping time range
     @storage.get_conflicting_meetings(
       payload["room_id"], payload["mtg_date"], payload["start_time"], payload["end_time"]
     ).empty?
   end
 
+  # Ensure that time matches hh:mm
   def valid_time?(time)
-    # ensure that time matches hh:mm
     !!(time =~ /\d{2}:\d{2}/) 
   end
 
+  # Ensure that date matches yyyy-mm-dd
   def valid_date?(date)
-    # ensure that date matches yyyy-mm-dd
     !!(date =~ /\d{4}-\d{2}-\d{2}/) 
   end
 
+  # Ensure that the selected room_id exists in the database
   def valid_room?(room_id)
-    # ensure that the selected room_id exists in the database
     @storage.all_rooms
             .map { |room| room["room_id"].to_i}
             .include?(room_id)
   end
 
+  # Use our other predefined helper methods to ensure that a given payload is fully valid and insertable
   def valid_mtg_payload?(payload)
     p room_available?(payload) &&
       valid_room?(payload["room_id"]) &&
@@ -51,10 +52,12 @@ helpers do
   end
 end
 
+# Bad paths should redirect to "/api/v1" where the docs live
 not_found do
-  redirect "/api/v1" # bad paths should redirect to "/"
+  redirect "/api/v1" 
 end
 
+# Baseline path, features the API docs in JSON form
 get "/api/v1" do
   json :endpoints => [
     :all_meetings => "GET /api/v1/meetings",
@@ -76,10 +79,12 @@ get "/api/v1" do
   ]
 end
 
+# Display all booked meetings
 get "/api/v1/meetings" do
   json :meetings => @storage.all_meetings
 end
 
+# Create a new meeting by passing a (valid) JSON payload in the request body
 post "/api/v1/meetings" do
   payload = JSON.parse(request.body.read)
 
@@ -91,6 +96,7 @@ post "/api/v1/meetings" do
   end
 end
 
+# Delete a given meeting having mtg_id
 delete "/api/v1/meetings/:mtg_id" do
   mtg_id = params[:mtg_id].to_i
   if !@storage.delete_meeting(mtg_id).cmd_tuples.zero?
@@ -100,6 +106,8 @@ delete "/api/v1/meetings/:mtg_id" do
   end
 end
 
+# Display all existing rooms
+# OPTIONAL: filter by date/start/end time like so: /api/v1/rooms?date=''&start_time=''&end_time=''
 get "/api/v1/rooms" do
   date = params['date']
   start_time = params['start_time']
@@ -112,7 +120,8 @@ get "/api/v1/rooms" do
   end
 end
 
-get "/api/v1/rooms/:id" do
-  room_id = params[:id].to_i
+# Display meetings for a given room having room_id
+get "/api/v1/rooms/:room_id" do
+  room_id = params[:room_id].to_i
   json :meetings => @storage.find_meetings_for_room(room_id)
 end
